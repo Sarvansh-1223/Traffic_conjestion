@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Login &middot; Traffic Congestion Analyzer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/style.css">
+</head>
+<body>
+
+<div class="page">
+
+  <header class="console-header">
+    <a href="/index.html" class="brand">
+      <span class="brand-mark">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 12c2-4 3-8 6-8s4 4 6 8" stroke="white" stroke-width="1.6" stroke-linecap="round"/><circle cx="8" cy="4" r="1.4" fill="white"/></svg>
+      </span>
+      <span class="brand-name">Traffic<span> Congestion Analyzer</span></span>
+    </a>
+  </header>
+
+  <div class="split-shell">
+
+    <div class="split-art">
+      <svg viewBox="0 0 360 360" width="100%" style="max-width:360px;" role="img" aria-label="Illustration of a road with a signpost">
+        <circle cx="180" cy="180" r="150" fill="#ffffff" opacity="0.5"/>
+        <path d="M40 320 C 100 260, 90 180, 180 150 S 300 90, 300 30" stroke="#ffffff" stroke-width="40" fill="none" stroke-linecap="round"/>
+        <path d="M40 320 C 100 260, 90 180, 180 150 S 300 90, 300 30" stroke="#94a3b8" stroke-width="2" fill="none" stroke-dasharray="9 11" stroke-linecap="round"/>
+        <g transform="translate(210 130)">
+          <rect x="-3" y="0" width="6" height="90" fill="#33475b"/>
+          <rect x="-46" y="-34" width="92" height="26" rx="4" fill="#2563eb"/>
+          <rect x="-40" y="-4" width="70" height="22" rx="4" fill="#15803d"/>
+        </g>
+        <circle cx="40" cy="320" r="9" fill="#b45309"/>
+      </svg>
+    </div>
+
+    <div class="split-form">
+      <div class="auth-card">
+
+        <div class="auth-lede">
+          <h1>Welcome back</h1>
+          <p>Sign in to your console.</p>
+        </div>
+
+        <div id="message"></div>
+
+        <form id="loginForm">
+
+          <div class="field">
+            <label for="email">Email</label>
+            <input type="email" id="email" required placeholder="you@example.com">
+          </div>
+
+          <div class="field">
+            <label for="password">Password</label>
+            <input type="password" id="password" required placeholder="Enter your password">
+          </div>
+
+          <button type="submit" id="loginButton" class="btn-primary">Sign in</button>
+
+        </form>
+
+        <div class="auth-switch">
+          Don't have an account? <a href="/register.html">Create one</a>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+
+</div>
+
+<script>
+
+    const form = document.getElementById("loginForm");
+    const button = document.getElementById("loginButton");
+    const message = document.getElementById("message");
+
+    form.addEventListener("submit", async function(event) {
+
+        event.preventDefault();
+
+        const email = document.getElementById("email").value.trim();
+        const password = document.getElementById("password").value;
+
+        button.disabled = true;
+        button.textContent = "Signing in\u2026";
+
+        try {
+
+            const response = await fetch("/login", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ email, password })
+            });
+
+            const result = await response.json();
+
+            if (!response.ok) {
+                throw new Error(result.error || "Login failed.");
+            }
+
+            localStorage.setItem("traffic_token", result.token);
+            localStorage.setItem("token", result.token);
+            localStorage.setItem("traffic_user", JSON.stringify(result.user));
+
+            showMessage("Signed in. Redirecting\u2026", "success");
+
+            setTimeout(function() {
+                window.location.href = "/dashboard.html";
+            }, 700);
+
+        } catch (error) {
+
+            showMessage(error.message, "error");
+
+            button.disabled = false;
+            button.textContent = "Sign in";
+
+        }
+
+    });
+
+    function showMessage(text, type) {
+        message.textContent = text;
+        message.className = type;
+    }
+
+</script>
+
+</body>
+</html>

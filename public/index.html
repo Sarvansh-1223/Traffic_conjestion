@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Traffic Congestion Analyzer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/style.css">
+</head>
+<body>
+
+<div class="page">
+
+  <header class="console-header">
+    <a href="/index.html" class="brand">
+      <span class="brand-mark">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 12c2-4 3-8 6-8s4 4 6 8" stroke="white" stroke-width="1.6" stroke-linecap="round"/><circle cx="8" cy="4" r="1.4" fill="white"/></svg>
+      </span>
+      <span class="brand-name">Traffic<span> Congestion Analyzer</span></span>
+    </a>
+    <div class="user-area">
+      <a href="/login.html" class="user-name" style="text-decoration:none;">Sign in</a>
+    </div>
+  </header>
+
+  <div class="wide-shell">
+
+    <div class="hero-grid">
+
+      <div>
+        <div class="eyebrow">
+          <span class="signal-strip -amber"><span class="seg"></span><span class="seg"></span><span class="seg"></span></span>
+          <span>QUICK ANALYSIS &middot; NO ACCOUNT NEEDED</span>
+        </div>
+
+        <h1 class="hero-heading">Read the road before you drive it.</h1>
+        <p class="hero-sub">Give us a road, a date and a time. We'll pull current and historical conditions and tell you what's actually happening out there.</p>
+
+        <div class="panel hero-form-panel">
+
+          <form id="trafficForm">
+
+            <div class="field">
+              <label for="road">Road name</label>
+              <input type="text" id="road" name="road" placeholder="e.g. NH44" required>
+            </div>
+
+            <div class="field">
+              <label for="recorded_date">Date</label>
+              <input type="date" id="recorded_date" name="recorded_date" required>
+            </div>
+
+            <div class="field">
+              <label for="recorded_time">Time</label>
+              <input type="time" id="recorded_time" name="recorded_time" required>
+            </div>
+
+            <button type="submit" id="analyzeButton" class="btn-primary">Analyze traffic</button>
+
+          </form>
+
+          <div id="loading" class="loading-panel">
+            <div class="loading-dot-row"><span></span><span></span><span></span></div>
+            <div>Reading road conditions&hellip;</div>
+          </div>
+
+          <div id="error"></div>
+
+        </div>
+
+        <p style="margin-top:16px; font-size:13px;">
+          Want to save your history and confirm live reports?
+          <a href="/register.html" style="color:var(--route-blue); text-decoration:none; font-weight:600;">Create an account</a>
+        </p>
+      </div>
+
+      <!-- Hero illustration: a winding route with a location pin and vehicle marker -->
+      <div>
+        <svg viewBox="0 0 480 420" width="100%" role="img" aria-label="Illustration of a winding road with a vehicle and location marker">
+          <rect x="0" y="0" width="480" height="420" rx="24" fill="#e2edf9"/>
+          <circle cx="400" cy="60" r="46" fill="#ffffff" opacity="0.6"/>
+          <circle cx="60" cy="340" r="30" fill="#ffffff" opacity="0.5"/>
+
+          <!-- road -->
+          <path d="M60 400 C 140 300, 100 220, 220 190 S 360 120, 340 40" stroke="#ffffff" stroke-width="46" fill="none" stroke-linecap="round"/>
+          <path d="M60 400 C 140 300, 100 220, 220 190 S 360 120, 340 40" stroke="#cbd5e1" stroke-width="46" fill="none" stroke-linecap="round" opacity="0.0"/>
+          <path d="M60 400 C 140 300, 100 220, 220 190 S 360 120, 340 40" stroke="#94a3b8" stroke-width="2.5" fill="none" stroke-dasharray="10 12" stroke-linecap="round"/>
+
+          <!-- car -->
+          <g transform="translate(150 240) rotate(-25)">
+            <rect x="-24" y="-14" width="48" height="26" rx="8" fill="#2563eb"/>
+            <rect x="-15" y="-22" width="30" height="14" rx="6" fill="#2563eb"/>
+            <circle cx="-14" cy="12" r="7" fill="#16202c"/>
+            <circle cx="14" cy="12" r="7" fill="#16202c"/>
+          </g>
+
+          <!-- destination pin -->
+          <g transform="translate(340 40)">
+            <path d="M0 -34 C16 -34 26 -22 26 -8 C26 12 0 34 0 34 C0 34 -26 12 -26 -8 C-26 -22 -16 -34 0 -34 Z" fill="#b91c1c"/>
+            <circle cx="0" cy="-8" r="8" fill="white"/>
+          </g>
+
+          <!-- start marker -->
+          <circle cx="60" cy="400" r="8" fill="#15803d"/>
+          <circle cx="60" cy="400" r="14" fill="none" stroke="#15803d" stroke-width="2" opacity="0.4"/>
+        </svg>
+      </div>
+
+    </div>
+
+    <div class="lane-divider"></div>
+
+    <div>
+      <h2 style="font-size:22px; margin-bottom:24px;">How it works</h2>
+
+      <div class="steps-row">
+
+        <div class="step-card">
+          <div class="step-number">01</div>
+          <h4>Tell us where and when</h4>
+          <p>Enter a road name plus the date and time you care about — right now, or a moment in the past.</p>
+        </div>
+
+        <div class="step-card">
+          <div class="step-number">02</div>
+          <h4>We pull the data</h4>
+          <p>Live conditions, weather and historical patterns for that road are gathered automatically.</p>
+        </div>
+
+        <div class="step-card">
+          <div class="step-number">03</div>
+          <h4>Get a clear read</h4>
+          <p>A congestion status, severity level and plain-language recommendation, ready in seconds.</p>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+
+</div>
+
+<script>
+
+const form = document.getElementById("trafficForm");
+const button = document.getElementById("analyzeButton");
+const loading = document.getElementById("loading");
+const errorBox = document.getElementById("error");
+
+form.addEventListener("submit", async function(event) {
+
+    event.preventDefault();
+
+    errorBox.style.display = "none";
+    errorBox.textContent = "";
+
+    form.style.display = "none";
+    button.disabled = true;
+    loading.style.display = "block";
+
+    const road = document.getElementById("road").value.trim();
+    const recordedDate = document.getElementById("recorded_date").value;
+    const recordedTime = document.getElementById("recorded_time").value;
+
+    const data = {
+        road: road,
+        recorded_date: recordedDate,
+        recorded_time: recordedTime
+    };
+
+    console.log("Sending to Node.js:", data);
+
+    try {
+
+        const response = await fetch("/api/analyze", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(data)
+        });
+
+        const result = await response.json();
+
+        console.log("Response:", result);
+
+        if (!response.ok) {
+            throw new Error(result.error || "Traffic analysis failed.");
+        }
+
+        sessionStorage.setItem("trafficResult", JSON.stringify(result));
+
+        window.location.href = "/result.html";
+
+    } catch (error) {
+
+        console.error(error);
+
+        loading.style.display = "none";
+        form.style.display = "block";
+
+        errorBox.textContent = error.message || "Something went wrong.";
+        errorBox.style.display = "block";
+
+        button.disabled = false;
+
+    }
+
+});
+
+</script>
+
+</body>
+</html>

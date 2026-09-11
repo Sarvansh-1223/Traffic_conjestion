@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Create account &middot; Traffic Congestion Analyzer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/style.css">
+</head>
+<body>
+
+<div class="page">
+
+  <header class="console-header">
+    <a href="/index.html" class="brand">
+      <span class="brand-mark">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 12c2-4 3-8 6-8s4 4 6 8" stroke="white" stroke-width="1.6" stroke-linecap="round"/><circle cx="8" cy="4" r="1.4" fill="white"/></svg>
+      </span>
+      <span class="brand-name">Traffic<span> Congestion Analyzer</span></span>
+    </a>
+  </header>
+
+  <div class="split-shell">
+
+    <div class="split-art">
+      <svg viewBox="0 0 360 360" width="100%" style="max-width:360px;" role="img" aria-label="Illustration of two roads merging at a location marker">
+        <circle cx="180" cy="180" r="150" fill="#ffffff" opacity="0.5"/>
+        <path d="M30 60 C 90 100, 120 140, 180 180" stroke="#ffffff" stroke-width="34" fill="none" stroke-linecap="round"/>
+        <path d="M330 60 C 270 100, 240 140, 180 180" stroke="#ffffff" stroke-width="34" fill="none" stroke-linecap="round"/>
+        <path d="M180 180 C 180 240, 180 280, 180 320" stroke="#ffffff" stroke-width="34" fill="none" stroke-linecap="round"/>
+        <path d="M30 60 C 90 100, 120 140, 180 180" stroke="#94a3b8" stroke-width="2" fill="none" stroke-dasharray="8 10"/>
+        <path d="M330 60 C 270 100, 240 140, 180 180" stroke="#94a3b8" stroke-width="2" fill="none" stroke-dasharray="8 10"/>
+        <path d="M180 180 C 180 240, 180 280, 180 320" stroke="#94a3b8" stroke-width="2" fill="none" stroke-dasharray="8 10"/>
+        <g transform="translate(180 178)">
+          <path d="M0 -34 C16 -34 26 -22 26 -8 C26 12 0 34 0 34 C0 34 -26 12 -26 -8 C-26 -22 -16 -34 0 -34 Z" fill="#2563eb"/>
+          <circle cx="0" cy="-8" r="8" fill="white"/>
+        </g>
+      </svg>
+    </div>
+
+    <div class="split-form">
+      <div class="auth-card">
+
+        <div class="auth-lede">
+          <h1>Set up your console</h1>
+          <p>Save your history and confirm live traffic reports.</p>
+        </div>
+
+        <div id="message"></div>
+
+        <form id="registerForm">
+
+          <div class="field">
+            <label for="name">Full name</label>
+            <input type="text" id="name" required placeholder="Enter your name">
+          </div>
+
+          <div class="field">
+            <label for="email">Email</label>
+            <input type="email" id="email" required placeholder="you@example.com">
+          </div>
+
+          <div class="field">
+            <label for="password">Password</label>
+            <input type="password" id="password" required minlength="6" placeholder="At least 6 characters">
+          </div>
+
+          <div class="field">
+            <label for="confirmPassword">Confirm password</label>
+            <input type="password" id="confirmPassword" required minlength="6" placeholder="Re-enter password">
+          </div>
+
+          <button type="submit" id="registerButton" class="btn-primary">Create account</button>
+
+        </form>
+
+        <div class="auth-switch">
+          Already have an account? <a href="/login.html">Sign in</a>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+
+</div>
+
+<script>
+
+    const form = document.getElementById("registerForm");
+    const button = document.getElementById("registerButton");
+    const message = document.getElementById("message");
+
+    form.addEventListener("submit", async function(event) {
+
+        event.preventDefault();
+
+        const name = document.getElementById("name").value.trim();
+        const email = document.getElementById("email").value.trim();
+        const password = document.getElementById("password").value;
+        const confirmPassword = document.getElementById("confirmPassword").value;
+
+        if (password !== confirmPassword) {
+            showMessage("Passwords do not match.", "error");
+            return;
+        }
+
+        button.disabled = true;
+        button.textContent = "Creating account\u2026";
+
+        try {
+
+            const response = await fetch("/register", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ name, email, password })
+            });
+
+            const result = await response.json();
+
+            if (!response.ok) {
+                throw new Error(result.error || "Registration failed.");
+            }
+
+            showMessage("Account created. Redirecting to sign in\u2026", "success");
+
+            setTimeout(function() {
+                window.location.href = "/login.html";
+            }, 1500);
+
+        } catch (error) {
+
+            showMessage(error.message, "error");
+
+            button.disabled = false;
+            button.textContent = "Create account";
+
+        }
+
+    });
+
+    function showMessage(text, type) {
+        message.textContent = text;
+        message.className = type;
+    }
+
+</script>
+
+</body>
+</html>

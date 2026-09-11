@@ -1,0 +1,343 @@
+<!-- Traffic Congestion Analyzer dashboard -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Console &middot; Traffic Congestion Analyzer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/style.css">
+</head>
+<body>
+
+<div class="page">
+
+  <header class="console-header">
+    <a href="/dashboard.html" class="brand">
+      <span class="brand-mark">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 12c2-4 3-8 6-8s4 4 6 8" stroke="white" stroke-width="1.6" stroke-linecap="round"/><circle cx="8" cy="4" r="1.4" fill="white"/></svg>
+      </span>
+      <span class="brand-name">Traffic<span> Congestion Analyzer</span></span>
+    </a>
+    <div class="user-area">
+      <span class="user-name" id="userName">User</span>
+      <button class="btn-danger" id="logoutButton">Sign out</button>
+    </div>
+  </header>
+
+  <div class="dash-shell">
+
+    <div>
+      <div class="eyebrow">
+        <span class="signal-strip -amber"><span class="seg"></span><span class="seg"></span><span class="seg"></span></span>
+        <span>YOUR CONSOLE</span>
+      </div>
+      <h2 style="font-size:22px; margin-bottom:6px;">Run a traffic analysis</h2>
+      <p style="font-size:14px; margin-bottom:20px;">Enter a road, date and time to check current conditions.</p>
+
+      <div class="panel">
+
+        <div id="message"></div>
+
+        <form id="trafficForm">
+
+          <div class="field">
+            <label for="road">Road name</label>
+            <input type="text" id="road" placeholder="e.g. NH44" required>
+          </div>
+
+          <div class="field">
+            <label for="date">Date</label>
+            <input type="date" id="date" required>
+          </div>
+
+          <div class="field">
+            <label for="time">Time</label>
+            <input type="time" id="time" required>
+          </div>
+
+          <button type="submit" id="analyzeButton" class="btn-primary">Analyze traffic</button>
+
+        </form>
+
+      </div>
+    </div>
+
+    <div>
+      <div class="tip-card">
+        <div class="tip-icon">
+          <svg width="26" height="26" viewBox="0 0 26 26" fill="none"><circle cx="13" cy="13" r="12" stroke="#2563eb" stroke-width="1.6"/><path d="M13 7v6l4 2" stroke="#2563eb" stroke-width="1.6" stroke-linecap="round"/></svg>
+        </div>
+        <h4>Check peak hours</h4>
+        <p>Morning and evening commute windows tend to carry the highest congestion severity — try comparing a peak and off-peak time for the same road.</p>
+      </div>
+
+      <div class="tip-card">
+        <div class="tip-icon">
+          <svg width="26" height="26" viewBox="0 0 26 26" fill="none"><path d="M13 3c5 0 9 4 9 9s-4 9-9 9-9-4-9-9 4-9 9-9Z" stroke="#2563eb" stroke-width="1.6"/><path d="M9 13h8M13 9v8" stroke="#2563eb" stroke-width="1.6" stroke-linecap="round"/></svg>
+        </div>
+        <h4>Confirm what you see</h4>
+        <p>After an analysis, you can submit your own observation. It's added to the confirmed count for that road and time.</p>
+      </div>
+
+      <div class="tip-card">
+        <div class="tip-icon">
+          <svg width="26" height="26" viewBox="0 0 26 26" fill="none"><path d="M4 20l6-14 5 10 3-6 4 10" stroke="#2563eb" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+        <h4>Use the full road name</h4>
+        <p>Highway codes like "NH44" return more consistent results than shortened or local nicknames.</p>
+      </div>
+    </div>
+
+  </div>
+
+</div>
+
+<script>
+
+    const token = localStorage.getItem("traffic_token");
+
+    if (!token) {
+        window.location.href = "/login.html";
+    }
+
+    const user = JSON.parse(localStorage.getItem("traffic_user") || "{}");
+
+    document.getElementById("userName").textContent = user.name || "User";
+
+    document.getElementById("logoutButton").addEventListener("click", function() {
+        localStorage.removeItem("traffic_token");
+        localStorage.removeItem("traffic_user");
+        window.location.href = "/login.html";
+    });
+
+    document.getElementById("trafficForm").addEventListener("submit", async function(event) {
+
+        event.preventDefault();
+
+        const road =
+            document.getElementById("road").value.trim();
+
+        const recorded_date =
+            document.getElementById("date").value;
+
+        const recorded_time =
+            document.getElementById("time").value;
+
+        if (!road || !recorded_date || !recorded_time) {
+            showMessage(
+                "Please enter road, date and time.",
+                "error"
+            );
+            return;
+        }
+
+        const button =
+            document.getElementById("analyzeButton");
+
+        button.disabled = true;
+        button.textContent = "Checking...";
+
+        showMessage(
+            "Checking traffic data...",
+            "info"
+        );
+
+        const token =
+            localStorage.getItem("traffic_token");
+
+        const params = new URLSearchParams({
+            road: road,
+            recorded_date: recorded_date,
+            recorded_time: recorded_time
+        });
+
+
+        try {
+
+            /*
+            * =====================================================
+            * 1. CHECK WHETHER ANALYSIS ALREADY EXISTS
+            * =====================================================
+            */
+
+            const analysisResponse = await fetch(
+                `/api/traffic-analysis?road=${encodeURIComponent(road)}` +
+                `&date=${encodeURIComponent(recorded_date)}` +
+                `&time=${encodeURIComponent(recorded_time)}`,
+                {
+                    headers: {
+                        "Authorization":
+                            "Bearer " + token
+                    }
+                }
+            );
+
+
+            if (analysisResponse.ok) {
+
+                console.log(
+                    "Existing analysis found."
+                );
+
+                window.location.href =
+                    `/result.html?${params.toString()}`;
+
+                return;
+            }
+
+
+            /*
+            * =====================================================
+            * 2. CHECK WHETHER SENSOR DATA EXISTS
+            * =====================================================
+            */
+
+            const sensorResponse = await fetch(
+                `/api/current-traffic` +
+                `?road=${encodeURIComponent(road)}` +
+                `&date=${encodeURIComponent(recorded_date)}` +
+                `&time=${encodeURIComponent(recorded_time)}`,
+                {
+                    headers: {
+                        "Authorization":
+                            "Bearer " + token
+                    }
+                }
+            );
+
+
+            if (sensorResponse.ok) {
+
+                console.log(
+                    "Sensor data found."
+                );
+
+                /*
+                * Sensor data exists.
+                * Go to result page immediately.
+                *
+                * result.html will then call /analyze
+                * and wait for n8n.
+                */
+
+                window.location.href =
+                    `/result.html?${params.toString()}`;
+
+                return;
+            }
+
+
+            /*
+            * =====================================================
+            * 3. NO SENSOR DATA
+            * =====================================================
+            *
+            * Stay on dashboard.
+            * Start the analysis workflow.
+            *
+            * /analyze waits for n8n and returns the
+            * generated analysis.
+            */
+
+            console.log(
+                "No sensor data found."
+            );
+
+            showMessage(
+                "No sensor data received yet. Waiting for traffic analysis...",
+                "info"
+            );
+
+            button.textContent =
+                "Waiting for analysis...";
+
+
+            const analysisRequest =
+                await fetch(
+                    "/api/analyze",
+                    {
+                        method: "POST",
+
+                        headers: {
+                            "Content-Type":
+                                "application/json",
+
+                            "Authorization":
+                                "Bearer " + token
+                        },
+
+                        body: JSON.stringify({
+
+                            road: road,
+
+                            recorded_date:
+                                recorded_date,
+
+                            recorded_time:
+                                recorded_time
+                        })
+                    }
+                );
+
+
+            const analysisResult =
+                await analysisRequest.json();
+
+
+            console.log(
+                "Analysis generated:",
+                analysisResult
+            );
+
+
+            if (!analysisRequest.ok) {
+
+                throw new Error(
+                    analysisResult.error ||
+                    "Unable to generate traffic analysis."
+                );
+            }
+
+
+            /*
+            * n8n has finished.
+            * NOW go to result.html.
+            */
+
+            window.location.href =
+                `/result.html?${params.toString()}`;
+
+
+        } catch (error) {
+
+            console.error(
+                "Dashboard analysis error:",
+                error
+            );
+
+            showMessage(
+                error.message ||
+                "Unable to process traffic analysis.",
+                "error"
+            );
+
+            button.disabled = false;
+
+            button.textContent =
+                "Analyze traffic";
+        }
+
+    });
+    
+    function showMessage(text, type) {
+        const message = document.getElementById("message");
+        message.textContent = text;
+        message.className = type;
+    }
+
+</script>
+
+</body>
+</html>

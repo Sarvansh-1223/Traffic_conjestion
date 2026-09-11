@@ -1,0 +1,1883 @@
+<!-- Traffic analysis result page -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Analysis result &middot; Traffic Congestion Analyzer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/style.css">
+</head>
+<body>
+
+<div class="page">
+
+  <header class="console-header">
+    <a href="/dashboard.html" class="brand">
+      <span class="brand-mark">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 12c2-4 3-8 6-8s4 4 6 8" stroke="white" stroke-width="1.6" stroke-linecap="round"/><circle cx="8" cy="4" r="1.4" fill="white"/></svg>
+      </span>
+      <span class="brand-name">Traffic<span> Congestion Analyzer</span></span>
+    </a>
+    <a href="/dashboard.html" class="user-name" style="text-decoration:none; font-size:14px;">&larr; New analysis</a>
+  </header>
+
+  <div class="wide-shell" style="padding-bottom:0;">
+    <div style="margin:32px 0 8px;">
+      <div class="eyebrow">
+        <span class="signal-strip -amber"><span class="seg"></span><span class="seg"></span><span class="seg"></span></span>
+        <span>ANALYSIS RESULT</span>
+      </div>
+      <h2 style="font-size:26px;">Traffic snapshot</h2>
+    </div>
+  </div>
+
+  <div id="loading" class="loading-panel panel" style="max-width:1180px; margin:24px auto 0;">
+    <div class="loading-dot-row"><span></span><span></span><span></span></div>
+    <div>Loading traffic analysis&hellip;</div>
+  </div>
+
+  <div id="result" class="result-shell" style="display:none;">
+
+    <!-- ============ LEFT: main analysis content ============ -->
+    <div>
+
+      <div class="panel">
+        <div class="panel-heading"><span>Current traffic information</span></div>
+        <div class="data-grid">
+          <div class="data-cell"><div class="label">Road</div><div class="value" id="road">&mdash;</div></div>
+          <div class="data-cell"><div class="label">Date</div><div class="value" id="date">&mdash;</div></div>
+          <div class="data-cell"><div class="label">Time</div><div class="value" id="time">&mdash;</div></div>
+          <div class="data-cell"><div class="label">Average speed</div><div class="value"><span id="speed">&mdash;</span><span class="unit">km/h</span></div></div>
+          <div class="data-cell"><div class="label">Vehicle count</div><div class="value" id="vehicles">&mdash;</div></div>
+          <div class="data-cell"><div class="label">Temperature</div><div class="value"><span id="temperature">&mdash;</span><span class="unit">&deg;C</span></div></div>
+          <div class="data-cell"><div class="label">Humidity</div><div class="value"><span id="humidity">&mdash;</span><span class="unit">%</span></div></div>
+        </div>
+      </div>
+      <!-- Severity gauge leads the page -->
+      <div class="panel">
+        <div class="panel-heading"><span>Traffic status</span></div>
+
+        <div class="gauge-hero">
+
+          <div class="gauge-wrap">
+            <svg width="180" height="110" viewBox="0 0 180 110">
+              <path d="M10 100 A80 80 0 0 1 170 100" stroke="#e7f6ec" stroke-width="18" fill="none"/>
+              <path d="M10 100 A80 80 0 0 1 60 25" stroke="#e7f6ec" stroke-width="18" fill="none"/>
+              <path d="M60 25 A80 80 0 0 1 120 25" stroke="#fdf1de" stroke-width="18" fill="none"/>
+              <path d="M120 25 A80 80 0 0 1 170 100" stroke="#fbe9e9" stroke-width="18" fill="none"/>
+              <g class="gauge-needle" id="gaugeNeedle" style="transform: rotate(-45deg);">
+                <line x1="90" y1="100" x2="90" y2="34" stroke="#16202c" stroke-width="4" stroke-linecap="round"/>
+                <circle cx="90" cy="100" r="7" fill="#16202c"/>
+              </g>
+            </svg>
+            <div class="gauge-readout" id="severityGaugeLabel">SEVERITY: &mdash;</div>
+          </div>
+
+          <div class="status-readout" style="margin-top:0;">
+            <div class="status-block">
+              <div class="label">Congestion status</div>
+              <div class="status-value" id="congestion">&mdash;</div>
+            </div>
+            <div class="status-block">
+              <div class="label">Severity</div>
+              <div class="status-value" id="severity">&mdash;</div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <div class="panel">
+          <div class="panel-heading">
+              <span>AI traffic analysis</span>
+              <span id="analysisStatus" style="
+                  font-size:12px;
+                  color:#6b7280;
+                  margin-left:auto;
+              ">
+                  Analyzing...
+              </span>
+          </div>
+
+          <div id="analysisLoading" style="padding:24px 0; color:#64748b;">
+              <div style="
+                  display:flex;
+                  align-items:center;
+                  gap:10px;
+                  margin-bottom:10px;">
+                  <span class="loading-spinner"></span>
+                  <strong>Analyzing traffic conditions...</strong>
+              </div>
+
+              <p style="margin:0;">
+                  Comparing current sensor data with historical traffic patterns.
+              </p>
+          </div>
+
+          <div id="analysisContent" style="display:none;">
+
+              <div class="analysis-block">
+                  <h4>Prediction</h4>
+                  <p id="prediction">&mdash;</p>
+              </div>
+
+              <div class="analysis-block">
+                  <h4>Reason</h4>
+                  <p id="reason">&mdash;</p>
+              </div>
+
+              <div class="analysis-block">
+                  <h4>Recommended action</h4>
+                  <p id="recommended_action">&mdash;</p>
+              </div>
+
+              <div class="analysis-block">
+                  <h4>Summary</h4>
+                  <p id="summary">&mdash;</p>
+              </div>
+
+          </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-heading"><span>Confirmed traffic observation</span></div>
+
+        <div class="confirmed-row">
+          <div>
+            <div class="label" style="font-size:13px; color:var(--slate-500);">Confirmed observation</div>
+            <div class="confirmed-value" id="confirmedObservation">No confirmed observation yet.</div>
+          </div>
+          <div>
+            <div class="confirmed-count-label" id="confirmedCountLabel">
+                Reports
+            </div>
+
+            <div class="confirmed-count" id="confirmedCount">
+                0
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ============ RIGHT: observation panel, pinned top ============ -->
+    <div class="result-sidebar">
+
+      <div class="panel" style="border-color:#bfdbfe; box-shadow:0 4px 14px rgba(37,99,235,0.08);">
+        <div class="panel-heading"><span>Your observation</span></div>
+        <p style="margin-bottom:18px; font-size:15.5px;">What did you observe at this location? Your report adds to the confirmed count for this road and time.</p>
+
+        <div id="message"></div>
+
+        <div class="field">
+          <label for="observation">Select an observation</label>
+          <select id="observation">
+            <option value="">Select an option</option>
+            <option value="Heavy traffic">Heavy traffic</option>
+            <option value="Slow moving traffic">Slow moving traffic</option>
+            <option value="Traffic accident">Traffic accident</option>
+            <option value="Road blockage">Road blockage</option>
+            <option value="Road construction">Road construction</option>
+            <option value="Weather related traffic">Weather related traffic</option>
+            <option value="Normal traffic">Normal traffic</option>
+            <option value="No unusual activity">No unusual activity</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+
+        <button id="submitObservation" class="btn-primary">Submit observation</button>
+      </div>
+
+      <div class="tip-card" style="margin-top:16px;">
+        <div class="tip-icon">
+          <svg width="24" height="24" viewBox="0 0 26 26" fill="none"><path d="M13 3c5 0 9 4 9 9s-4 9-9 9-9-4-9-9 4-9 9-9Z" stroke="#2563eb" stroke-width="1.6"/><path d="M9 13h8M13 9v8" stroke="#2563eb" stroke-width="1.6" stroke-linecap="round"/></svg>
+        </div>
+        <h4>Why it matters</h4>
+        <p>Confirmed reports from real drivers help refine future predictions for this road.</p>
+      </div>
+
+    </div>
+
+  </div>
+
+  <div style="height:80px;"></div>
+
+</div>
+
+<script>
+
+const params = new URLSearchParams(window.location.search);
+
+const selectedRoad =
+    params.get("road");
+
+const selectedDate =
+    params.get("recorded_date");
+
+const selectedTime =
+    params.get("recorded_time");
+
+
+// Holds the complete traffic information
+// used by the observation system.
+let analysis = null;
+
+
+function formatDate(dateValue) {
+
+    if (!dateValue) {
+        return "-";
+    }
+
+    const value = String(dateValue);
+
+   
+    if (/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+
+        const parts = value.split("-");
+
+        const year = parts[0];
+        const month = parts[1];
+        const day = parts[2];
+
+        return `${day}-${month}-${year}`;
+    }
+
+
+    // Handle ISO datetime values
+
+    const date = new Date(value);
+
+    if (isNaN(date.getTime())) {
+        return value;
+    }
+
+
+    const day =
+        String(date.getDate()).padStart(2, "0");
+
+    const month =
+        String(date.getMonth() + 1).padStart(2, "0");
+
+    const year =
+        date.getFullYear();
+
+
+    return `${day}-${month}-${year}`;
+}
+
+
+function formatTime(timeValue) {
+
+    if (!timeValue) {
+        return "-";
+    }
+
+    const value = String(timeValue);
+
+    // MySQL TIME:
+    //
+    // 16:05:46
+    //      ↓
+    // 16:05
+
+    if (/^\d{2}:\d{2}(:\d{2})?$/.test(value)) {
+
+        return value.substring(0, 5);
+    }
+
+
+    // Handle ISO datetime
+
+    const date = new Date(value);
+
+    if (isNaN(date.getTime())) {
+        return value;
+    }
+
+
+    const hours =
+        String(date.getHours()).padStart(2, "0");
+
+    const minutes =
+        String(date.getMinutes()).padStart(2, "0");
+
+
+    return `${hours}:${minutes}`;
+}
+
+
+function displaySensorData(data) {
+
+    console.log(
+        "Displaying sensor data:",
+        data
+    );
+
+
+   
+    document.getElementById("road").textContent =
+        data.road ??
+        selectedRoad ??
+        "-";
+
+
+    
+    document.getElementById("date").textContent =
+        formatDate(
+            data.recorded_date ??
+            selectedDate
+        );
+
+
+    document.getElementById("time").textContent =
+        formatTime(
+            data.recorded_time ??
+            selectedTime
+        );
+
+
+    document.getElementById("speed").textContent =
+        data.average_speed ??
+        "N/A";
+
+
+    document.getElementById("vehicles").textContent =
+        data.vehicle_count ??
+        "N/A";
+
+
+    document.getElementById("temperature").textContent =
+        data.temperature ??
+        "N/A";
+
+
+    document.getElementById("humidity").textContent =
+        data.humidity ??
+        "N/A";
+}
+
+
+
+function showAnalysisLoading() {
+
+    const congestion =
+        document.getElementById("congestion");
+
+    const severity =
+        document.getElementById("severity");
+
+    const status =
+        document.getElementById("analysisStatus");
+
+    const loading =
+        document.getElementById("analysisLoading");
+
+    const content =
+        document.getElementById("analysisContent");
+
+    const gaugeLabel =
+        document.getElementById(
+            "severityGaugeLabel"
+        );
+
+
+    if (congestion) {
+        congestion.textContent =
+            "Analyzing...";
+    }
+
+
+    if (severity) {
+        severity.textContent =
+            "Analyzing...";
+    }
+
+
+    if (status) {
+        status.textContent =
+            "Analyzing...";
+    }
+
+
+    if (gaugeLabel) {
+        gaugeLabel.textContent =
+            "SEVERITY: —";
+    }
+
+
+    if (loading) {
+        loading.style.display =
+            "block";
+    }
+
+
+    if (content) {
+        content.style.display =
+            "none";
+    }
+}
+
+
+function showResultPage() {
+
+    const loading =
+        document.getElementById("loading");
+
+    const result =
+        document.getElementById("result");
+
+
+    if (loading) {
+        loading.style.display =
+            "none";
+    }
+
+
+    if (result) {
+        result.style.display =
+            "grid";
+    }
+}
+
+
+function showSensorError(message) {
+
+    const loading =
+        document.getElementById("loading");
+
+
+    if (!loading) {
+        return;
+    }
+
+
+    const messageElement =
+        loading.querySelector(
+            "div:last-child"
+        );
+
+
+    if (messageElement) {
+
+        messageElement.textContent =
+            message;
+    }
+}
+
+
+async function loadSensorData() {
+
+    if (
+        !selectedRoad ||
+        !selectedDate ||
+        !selectedTime
+    ) {
+
+        showSensorError(
+            "Road, date and time are required."
+        );
+
+        return;
+    }
+
+
+    console.log(
+        "Loading traffic data:",
+        {
+            road: selectedRoad,
+            date: selectedDate,
+            time: selectedTime
+        }
+    );
+
+
+    const token =
+        localStorage.getItem("traffic_token");
+
+
+    /*
+     * =====================================================
+     * 1. CHECK EXISTING ANALYSIS
+     * =====================================================
+     */
+
+    try {
+
+        const analysisResponse =
+            await fetch(
+                `/api/traffic-analysis` +
+                `?road=${encodeURIComponent(selectedRoad)}` +
+                `&date=${encodeURIComponent(selectedDate)}` +
+                `&time=${encodeURIComponent(selectedTime)}`,
+
+                {
+                    headers: {
+                        "Authorization":
+                            "Bearer " + token
+                    }
+                }
+            );
+
+
+        if (analysisResponse.ok) {
+
+        const existingAnalysis = await analysisResponse.json();
+
+        console.log(
+            "Existing analysis found:",
+            existingAnalysis
+        );
+
+        // IMPORTANT:
+        // Store the existing analysis in the global
+        // variable used by the observation system.
+        analysis =
+            existingAnalysis;
+
+        // Show existing traffic data
+        displaySensorData(existingAnalysis);
+
+        // Show existing AI analysis
+        displayAnalysisResult(existingAnalysis);
+
+        showResultPage();
+
+        // -------------------------------------------------
+        // IMPORTANT:
+        // If temperature/humidity are missing from the
+        // stored analysis, get fresh sensor data.
+        // -------------------------------------------------
+
+        const hasTemperature =
+            existingAnalysis.temperature !== undefined &&
+            existingAnalysis.temperature !== null;
+
+        const hasHumidity =
+            existingAnalysis.humidity !== undefined &&
+            existingAnalysis.humidity !== null;
+
+        if (!hasTemperature || !hasHumidity) {
+
+        console.log(
+            "Temperature/Humidity missing from existing analysis. Loading sensor data..."
+        );
+
+        try {
+
+            const sensorResponse =
+                await fetch(
+                    `/api/current-traffic` +
+                    `?road=${encodeURIComponent(selectedRoad)}` +
+                    `&date=${encodeURIComponent(selectedDate)}` +
+                    `&time=${encodeURIComponent(selectedTime)}`,
+                    {
+                        method: "GET",
+                        headers: {
+                            "Authorization":
+                                "Bearer " + token
+                        }
+                    }
+                );
+
+            if (sensorResponse.ok) {
+
+                const sensorData =
+                    await sensorResponse.json();
+
+                console.log(
+                    "Fresh sensor data:",
+                    sensorData
+                );
+
+                // Update temperature
+                if (
+                    sensorData.temperature !== undefined &&
+                    sensorData.temperature !== null
+                ) {
+                    document.getElementById(
+                        "temperature"
+                    ).textContent =
+                        sensorData.temperature;
+
+                    existingAnalysis.temperature =
+                        sensorData.temperature;
+                }
+
+                // Update humidity
+                if (
+                    sensorData.humidity !== undefined &&
+                    sensorData.humidity !== null
+                ) {
+                    document.getElementById(
+                        "humidity"
+                    ).textContent =
+                        sensorData.humidity;
+
+                    existingAnalysis.humidity =
+                        sensorData.humidity;
+                }
+
+                // Keep complete data
+                analysis = {
+                    ...existingAnalysis,
+                    ...sensorData
+                };
+
+            }
+
+                } catch (sensorError) {
+
+                    console.error(
+                        "Unable to load sensor values:",
+                        sensorError
+                    );
+                }
+            }
+
+            return;
+        }
+
+    } catch (error) {
+
+        console.warn(
+            "Existing analysis check failed:",
+            error
+        );
+    }
+
+
+    /*
+     * =====================================================
+     * 2. CHECK SENSOR DATA
+     * =====================================================
+     */
+
+    try {
+
+        const sensorResponse =
+            await fetch(
+                `/api/current-traffic` +
+                `?road=${encodeURIComponent(selectedRoad)}` +
+                `&date=${encodeURIComponent(selectedDate)}` +
+                `&time=${encodeURIComponent(selectedTime)}`,
+
+                {
+                    method: "GET",
+
+                    headers: {
+                        "Authorization":
+                            "Bearer " + token
+                    }
+                }
+            );
+
+
+        if (sensorResponse.ok) {
+
+            const sensorData =
+                await sensorResponse.json();
+
+
+            console.log(
+                "Sensor data found:",
+                sensorData
+            );
+
+
+            /*
+             * Store REAL sensor data.
+             */
+
+            analysis =
+                sensorData;
+
+
+            /*
+             * Show result page.
+             */
+
+            displaySensorData(
+                sensorData
+            );
+
+            showAnalysisLoading();
+
+            showResultPage();
+
+
+            /*
+             * Now start n8n.
+             */
+
+            runAnalysis(
+                sensorData
+            );
+
+            return;
+        }
+
+
+        /*
+         * =================================================
+         * NO SENSOR DATA
+         * =================================================
+         *
+         * Do NOT show N/A sensor values.
+         *
+         * This situation should normally not happen because
+         * dashboard waits for /analyze before opening this page.
+         *
+         * Keep page in loading state if it happens.
+         */
+
+        console.log(
+            "No sensor data available."
+        );
+
+
+        showSensorError(
+            "Waiting for traffic analysis..."
+        );
+
+
+    } catch (error) {
+
+        console.error(
+            "Sensor data error:",
+            error
+        );
+
+
+        showSensorError(
+            "Waiting for traffic analysis..."
+        );
+    }
+}
+
+function displayAnalysisResult(data) {
+
+    if (!data) {
+        return;
+    }
+
+
+    const prediction =
+        document.getElementById("prediction");
+
+    const reason =
+        document.getElementById("reason");
+
+    const recommendedAction =
+        document.getElementById("recommended_action");
+
+    const summary =
+        document.getElementById("summary");
+
+
+    if (prediction) {
+
+        prediction.textContent =
+            data.prediction ?? "-";
+    }
+
+
+    if (reason) {
+
+        reason.textContent =
+            data.reason ?? "-";
+    }
+
+
+    if (recommendedAction) {
+
+        recommendedAction.textContent =
+            data.recommended_action ?? "-";
+    }
+
+
+    if (summary) {
+
+        summary.textContent =
+            data.summary ?? "-";
+    }
+
+
+    /*
+     * Hide loading section
+     */
+
+    const analysisLoading =
+        document.getElementById(
+            "analysisLoading"
+        );
+
+    const analysisContent =
+        document.getElementById(
+            "analysisContent"
+        );
+
+
+    if (analysisLoading) {
+
+        analysisLoading.style.display =
+            "none";
+    }
+
+
+    if (analysisContent) {
+
+        analysisContent.style.display =
+            "block";
+    }
+
+
+    /*
+     * Status
+     */
+
+    const status =
+        document.getElementById(
+            "analysisStatus"
+        );
+
+
+    if (status) {
+
+        status.textContent =
+            "Complete";
+    }
+
+
+    /*
+     * Congestion
+     */
+
+    const congestionElement =
+        document.getElementById(
+            "congestion"
+        );
+
+
+    if (
+        congestionElement &&
+        data.congestion !== undefined
+    ) {
+
+        congestionElement.textContent =
+            data.congestion;
+
+
+        congestionElement.classList.remove(
+            "congestion-detected",
+            "congestion-normal"
+        );
+
+
+        const value =
+            String(
+                data.congestion
+            ).toLowerCase();
+
+
+        if (
+            value === "true" ||
+            value.includes("congestion") ||
+            value.includes("detected")
+        ) {
+
+            congestionElement.classList.add(
+                "congestion-detected"
+            );
+
+        } else {
+
+            congestionElement.classList.add(
+                "congestion-normal"
+            );
+        }
+    }
+
+
+    /*
+     * Severity
+     */
+
+    if (data.severity) {
+
+        const severity =
+            String(
+                data.severity
+            ).toLowerCase();
+
+
+        const severityElement =
+            document.getElementById(
+                "severity"
+            );
+
+        const gaugeNeedle =
+            document.getElementById(
+                "gaugeNeedle"
+            );
+
+        const gaugeLabel =
+            document.getElementById(
+                "severityGaugeLabel"
+            );
+
+
+        if (severityElement) {
+
+            severityElement.textContent =
+                data.severity;
+
+            severityElement.classList.remove(
+                "severity-low",
+                "severity-medium",
+                "severity-high",
+                "severity-extreme"
+            );
+
+
+            severityElement.classList.add(
+                `severity-${severity}`
+            );
+        }
+
+
+        const severityAngles = {
+
+            low: -60,
+
+            medium: -20,
+
+            high: 20,
+
+            extreme: 60
+
+        };
+
+
+        if (
+            gaugeNeedle &&
+            severityAngles[severity] !== undefined
+        ) {
+
+            gaugeNeedle.style.transform =
+                `rotate(${severityAngles[severity]}deg)`;
+        }
+
+
+        if (gaugeLabel) {
+
+            gaugeLabel.textContent =
+                "SEVERITY: " +
+                severity.toUpperCase();
+        }
+    }
+}
+
+async function runAnalysis(sensorData) {
+
+    try {
+
+        console.log(
+            "Starting traffic analysis:",
+            sensorData
+        );
+
+        const analysisStatus =
+            document.getElementById(
+                "analysisStatus"
+            );
+
+
+        if (analysisStatus) {
+
+            analysisStatus.textContent =
+                "Analyzing...";
+        }
+
+        const response =
+            await fetch(
+                "/api/analyze",
+                {
+                    method: "POST",
+
+                    headers: {
+
+                        "Content-Type":
+                            "application/json",
+
+                        "Authorization":
+                            "Bearer " +
+                            localStorage.getItem(
+                                "traffic_token"
+                            )
+                    },
+
+                    body: JSON.stringify({
+                        road:
+                            sensorData.road ??
+                            selectedRoad,
+
+                        recorded_date:
+                            sensorData.recorded_date ??
+                            selectedDate,
+
+                        recorded_time:
+                            sensorData.recorded_time ??
+                            selectedTime,
+
+                        average_speed:
+                            sensorData.average_speed ?? null,
+
+                        vehicle_count:
+                            sensorData.vehicle_count ?? null,
+
+                        temperature:
+                            sensorData.temperature ?? null,
+
+                        humidity:
+                            sensorData.humidity ?? null
+                    })
+                }
+            );
+
+        let result = null;
+
+
+        try {
+
+            result =
+                await response.json();
+
+        } catch (jsonError) {
+
+            throw new Error(
+                "Invalid response received from analysis server."
+            );
+        }
+
+
+        console.log(
+            "Analysis response:",
+            result
+        );
+
+
+        if (!response.ok) {
+
+            throw new Error(
+                result.error ||
+                "Traffic analysis failed."
+            );
+        }
+
+        const analysisResult =
+            result.analysis &&
+            typeof result.analysis === "object"
+
+                ? result.analysis
+
+                : result;
+
+
+        console.log(
+            "Final analysis result:",
+            analysisResult
+        );
+
+        analysis = {
+
+            ...sensorData,
+
+            ...analysisResult
+
+        };
+
+
+        const prediction =
+            document.getElementById(
+                "prediction"
+            );
+
+
+        const reason =
+            document.getElementById(
+                "reason"
+            );
+
+
+        const recommendedAction =
+            document.getElementById(
+                "recommended_action"
+            );
+
+
+        const summary =
+            document.getElementById(
+                "summary"
+            );
+
+        // =================================================
+        // UPDATE SENSOR VALUES FROM FINAL ANALYSIS RESULT
+        // =================================================
+
+        if (
+            analysisResult.temperature !== undefined &&
+            analysisResult.temperature !== null
+        ) {
+            document.getElementById("temperature").textContent =
+                analysisResult.temperature;
+        }
+
+        if (
+            analysisResult.humidity !== undefined &&
+            analysisResult.humidity !== null
+        ) {
+            document.getElementById("humidity").textContent =
+                analysisResult.humidity;
+        }
+
+        if (prediction) {
+
+            prediction.textContent =
+                analysisResult.prediction ??
+                "-";
+        }
+
+
+        if (reason) {
+
+            reason.textContent =
+                analysisResult.reason ??
+                "-";
+        }
+
+
+        if (recommendedAction) {
+
+            recommendedAction.textContent =
+                analysisResult.recommended_action ??
+                "-";
+        }
+
+
+        if (summary) {
+
+            summary.textContent =
+                analysisResult.summary ??
+                "-";
+        }
+
+        if (
+            analysisResult.congestion !==
+            undefined
+        ) {
+
+            const congestionElement =
+                document.getElementById(
+                    "congestion"
+                );
+
+
+            if (congestionElement) {
+
+                const congestionValue =
+                    analysisResult.congestion;
+
+
+                congestionElement.textContent =
+                    congestionValue;
+
+
+                // Remove old classes
+
+                congestionElement.classList.remove(
+                    "congestion-detected",
+                    "congestion-normal"
+                );
+
+
+                const congestionString =
+                    String(
+                        congestionValue
+                    ).toLowerCase();
+
+
+                if (
+
+                    congestionString === "true" ||
+
+                    congestionString.includes(
+                        "detected"
+                    ) ||
+
+                    congestionString.includes(
+                        "congestion"
+                    )
+
+                ) {
+
+                    congestionElement.classList.add(
+                        "congestion-detected"
+                    );
+
+                } else {
+
+                    congestionElement.classList.add(
+                        "congestion-normal"
+                    );
+                }
+            }
+        }
+
+
+        if (
+            analysisResult.severity
+        ) {
+
+            const severity =
+                String(
+                    analysisResult.severity
+                ).toLowerCase();
+
+
+            const severityElement =
+                document.getElementById(
+                    "severity"
+                );
+
+
+            const gaugeNeedle =
+                document.getElementById(
+                    "gaugeNeedle"
+                );
+
+
+            const gaugeLabel =
+                document.getElementById(
+                    "severityGaugeLabel"
+                );
+
+
+            if (severityElement) {
+
+                severityElement.textContent =
+                    analysisResult.severity;
+
+
+                severityElement.classList.remove(
+                    "severity-low",
+                    "severity-medium",
+                    "severity-high",
+                    "severity-extreme"
+                );
+
+
+                if (
+                    severity === "low"
+                ) {
+
+                    severityElement.classList.add(
+                        "severity-low"
+                    );
+
+                } else if (
+                    severity === "medium"
+                ) {
+
+                    severityElement.classList.add(
+                        "severity-medium"
+                    );
+
+                } else if (
+                    severity === "high"
+                ) {
+
+                    severityElement.classList.add(
+                        "severity-high"
+                    );
+
+                } else if (
+                    severity === "extreme"
+                ) {
+
+                    severityElement.classList.add(
+                        "severity-extreme"
+                    );
+                }
+            }
+
+            const severityAngles = {
+
+                low: -60,
+
+                medium: -20,
+
+                high: 20,
+
+                extreme: 60
+
+            };
+
+
+            if (
+                gaugeNeedle &&
+                severityAngles[severity] !==
+                    undefined
+            ) {
+
+                gaugeNeedle.style.transform =
+                    `rotate(${severityAngles[severity]}deg)`;
+            }
+
+
+            if (gaugeLabel) {
+
+                gaugeLabel.textContent =
+                    "SEVERITY: " +
+                    String(
+                        analysisResult.severity
+                    ).toUpperCase();
+            }
+        }
+
+        const analysisLoading =
+            document.getElementById(
+                "analysisLoading"
+            );
+
+
+        const analysisContent =
+            document.getElementById(
+                "analysisContent"
+            );
+
+
+        if (analysisLoading) {
+
+            analysisLoading.style.display =
+                "none";
+        }
+
+
+        if (analysisContent) {
+
+            analysisContent.style.display =
+                "block";
+        }
+
+
+        if (analysisStatus) {
+
+            analysisStatus.textContent =
+                "Complete";
+        }
+
+
+        console.log(
+            "Traffic analysis completed successfully."
+        );
+
+
+    } catch (error) {
+        console.error(
+            "Analysis error:",
+            error
+        );
+
+
+        const analysisLoading =
+            document.getElementById(
+                "analysisLoading"
+            );
+
+
+        const analysisStatus =
+            document.getElementById(
+                "analysisStatus"
+            );
+
+
+        if (analysisLoading) {
+
+            analysisLoading.innerHTML = `
+
+                <div style="color:#dc2626;">
+
+                    <strong>
+                        Analysis failed.
+                    </strong>
+
+                    <p>
+                        ${error.message}
+                    </p>
+
+                </div>
+
+            `;
+
+            analysisLoading.style.display =
+                "block";
+        }
+
+
+        if (analysisStatus) {
+
+            analysisStatus.textContent =
+                "Failed";
+        }
+    }
+}
+
+
+document
+    .getElementById(
+        "submitObservation"
+    )
+    .addEventListener(
+        "click",
+        async function () {
+
+            const observation =
+                document.getElementById(
+                    "observation"
+                ).value;
+
+            const token =
+                localStorage.getItem(
+                    "traffic_token"
+                );
+
+
+            if (!token) {
+
+                showMessage(
+                    "Please login first.",
+                    "error"
+                );
+
+                return;
+            }
+
+
+            if (!observation) {
+
+                showMessage(
+                    "Please select your observation.",
+                    "error"
+                );
+
+                return;
+            }
+
+
+            if (!analysis) {
+
+                showMessage(
+                    "Traffic analysis data is not available.",
+                    "error"
+                );
+
+                return;
+            }
+
+
+            const button =
+                document.getElementById(
+                    "submitObservation"
+                );
+
+
+            button.disabled =
+                true;
+
+
+            button.textContent =
+                "Submitting…";
+
+
+            try {
+
+                const response =
+                    await fetch(
+                        "/api/observation",
+                        {
+                            method: "POST",
+
+                            headers: {
+
+                                "Content-Type":
+                                    "application/json",
+
+                                "Authorization":
+                                    "Bearer " +
+                                    token
+
+                            },
+
+                            body: JSON.stringify({
+
+                                request_type:
+                                    "observation",
+
+                                user_id:
+                                    getUserId(),
+
+                                role:
+                                    "USER",
+
+                                road:
+                                    analysis.road ??
+                                    selectedRoad,
+
+                                recorded_date:
+                                    analysis.recorded_date ??
+                                    selectedDate,
+
+                                recorded_time:
+                                    analysis.recorded_time ??
+                                    selectedTime,
+
+                                observation:
+                                    observation
+
+                            })
+                        }
+                    );
+
+
+                let result = null;
+
+
+                try {
+
+                    result =
+                        await response.json();
+
+                } catch (jsonError) {
+
+                    result = {};
+                }
+
+
+                console.log(
+                    "Observation response:",
+                    result
+                );
+
+
+                if (!response.ok) {
+
+                    throw new Error(
+                        result.error ||
+                        "Failed to submit observation."
+                    );
+                }
+
+
+                showMessage(
+                    "Observation submitted successfully.",
+                    "success"
+                );
+
+
+                button.textContent =
+                    "Submitted";
+
+
+            } catch (error) {
+
+                console.error(
+                    "Observation error:",
+                    error
+                );
+
+
+                showMessage(
+                    error.message ||
+                    "Unable to submit observation.",
+                    "error"
+                );
+
+
+                button.disabled =
+                    false;
+
+
+                button.textContent =
+                    "Submit observation";
+            }
+        }
+    );
+
+function getUserId() {
+
+    try {
+
+        const user =
+            JSON.parse(
+                localStorage.getItem(
+                    "traffic_user"
+                ) || "{}"
+            );
+
+
+        return (
+            user.user_id ??
+            user.id ??
+            null
+        );
+
+    } catch (error) {
+
+        console.error(
+            "Unable to read user information:",
+            error
+        );
+
+
+        return null;
+    }
+}
+
+
+function showMessage(
+    message,
+    type
+) {
+
+    const element =
+        document.getElementById(
+            "message"
+        );
+
+
+    if (!element) {
+        return;
+    }
+
+
+    element.textContent =
+        message;
+
+
+    element.className =
+        type;
+
+
+    element.style.display =
+        "block";
+}
+
+async function loadConfirmedObservation() {
+
+    try {
+
+        const token =
+            localStorage.getItem(
+                "traffic_token"
+            );
+
+
+        if (!token) {
+
+            document.getElementById(
+                "confirmedObservation"
+            ).textContent =
+                "Please login first.";
+
+            return;
+        }
+
+
+        // =====================================================
+        // GET ROAD / DATE / TIME FROM RESULT PAGE URL
+        // =====================================================
+
+        const params =
+            new URLSearchParams(
+                window.location.search
+            );
+
+
+        const road =
+            params.get("road");
+
+        const recordedDate =
+            params.get("recorded_date");
+
+        const recordedTime =
+            params.get("recorded_time");
+
+
+        console.log(
+            "Loading confirmed observation for:",
+            {
+                road,
+                recordedDate,
+                recordedTime
+            }
+        );
+
+
+        if (
+            !road ||
+            !recordedDate ||
+            !recordedTime
+        ) {
+
+            console.error(
+                "Missing road/date/time."
+            );
+
+            return;
+        }
+
+
+        // =====================================================
+        // CALL BACKEND
+        // =====================================================
+
+        const query =
+            new URLSearchParams({
+
+                road:
+                    road,
+
+                recorded_date:
+                    recordedDate,
+
+                recorded_time:
+                    recordedTime
+
+            });
+
+
+        const response =
+            await fetch(
+                `/api/confirmed-observation?${query.toString()}`,
+                {
+                    method: "GET",
+
+                    headers: {
+
+                        "Authorization":
+                            "Bearer " +
+                            token
+                    }
+                }
+            );
+
+
+        const data =
+            await response.json();
+
+
+        console.log(
+            "Confirmed observation response:",
+            data
+        );
+
+
+        if (!response.ok) {
+
+            throw new Error(
+                data.error ||
+                "Unable to load confirmed observation."
+            );
+        }
+
+
+        // =====================================================
+        // DISPLAY RESULT
+        // =====================================================
+
+        if (data.confirmed) {
+
+            document.getElementById(
+                "confirmedObservation"
+            ).textContent =
+                data.observation ||
+                "Confirmed observation available.";
+
+
+            if (
+                Number(data.user_count) === 0
+            ) {
+
+                document.getElementById(
+                    "confirmedCountLabel"
+                ).textContent =
+                    "Priority";
+
+
+                document.getElementById(
+                    "confirmedCount"
+                ).textContent =
+                    "ADMIN";
+
+            } else {
+
+                document.getElementById(
+                    "confirmedCountLabel"
+                ).textContent =
+                    "Reports";
+
+
+                document.getElementById(
+                    "confirmedCount"
+                ).textContent =
+                    data.user_count;
+            }
+
+
+        } else {
+
+            document.getElementById(
+                "confirmedObservation"
+            ).textContent =
+                "No confirmed observation yet.";
+
+
+            document.getElementById(
+                "confirmedCountLabel"
+            ).textContent =
+                "Reports";
+
+
+            document.getElementById(
+                "confirmedCount"
+            ).textContent =
+                "0";
+        }
+
+
+    } catch (error) {
+
+        console.error(
+            "Confirmed observation error:",
+            error
+        );
+
+
+        document.getElementById(
+            "confirmedObservation"
+        ).textContent =
+            "Unable to load confirmed observation.";
+    }
+}
+loadSensorData();
+
+loadConfirmedObservation();
+
+</script>
+
+</body>
+</html>
